@@ -17,6 +17,7 @@
 package com.google.mlkit.vision.demo.kotlin
 
 import android.content.Intent
+import android.opengl.Visibility
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
@@ -63,7 +64,8 @@ class LivePreviewActivity :
   private var cameraSource: CameraSource? = null
   private var preview: CameraSourcePreview? = null
   private var graphicOverlay: GraphicOverlay? = null
-  private var selectedModel = OBJECT_DETECTION
+//  private var selectedModel = OBJECT_DETECTION
+  private var selectedModel = POSE_DETECTION
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -104,8 +106,9 @@ class LivePreviewActivity :
     // Drop down layout style - list view with radio button
     dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     // attaching data adapter to spinner
-    spinner.adapter = dataAdapter
-    spinner.onItemSelectedListener = this
+//    spinner.adapter = dataAdapter
+//    spinner.onItemSelectedListener = this
+    spinner.visibility = View.GONE;
 
     val facingSwitch = findViewById<ToggleButton>(R.id.facing_switch)
     facingSwitch.setOnCheckedChangeListener(this)
@@ -116,6 +119,8 @@ class LivePreviewActivity :
       intent.putExtra(SettingsActivity.EXTRA_LAUNCH_SOURCE, LaunchSource.LIVE_PREVIEW)
       startActivity(intent)
     }
+
+    settingsButton.visibility = View.GONE;
 
     createCameraSource(selectedModel)
   }

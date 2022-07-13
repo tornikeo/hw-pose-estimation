@@ -45,9 +45,10 @@ class ChooserActivity :
     // Set up ListView and Adapter
     val listView = findViewById<ListView>(R.id.test_activity_list_view)
     val adapter = MyArrayAdapter(this, android.R.layout.simple_list_item_2, CLASSES)
-    adapter.setDescriptionIds(DESCRIPTION_IDS)
-    listView.adapter = adapter
-    listView.onItemClickListener = this
+//    adapter.setDescriptionIds(DESCRIPTION_IDS)
+//    listView.adapter = adapter
+//    listView.onItemClickListener = this
+    startActivity(Intent(this, LivePreviewActivity::class.java))
   }
 
   override fun onItemClick(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
