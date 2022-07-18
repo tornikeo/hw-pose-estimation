@@ -81,6 +81,8 @@ class PoseDataExtractorProcessor(
   }
 
   override fun detectInImage(image: MlImage): Task<PoseWithClassification> {
+    // TODO: Remove in production.
+    Thread.sleep(500)
     return detector
       .process(image)
       .continueWith(

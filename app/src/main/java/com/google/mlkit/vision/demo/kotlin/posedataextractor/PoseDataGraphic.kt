@@ -20,13 +20,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import com.google.common.primitives.Ints
+import com.google.mlkit.vision.common.PointF3D
 import com.google.mlkit.vision.demo.GraphicOverlay
 import com.google.mlkit.vision.demo.GraphicOverlay.Graphic
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
-import java.lang.Math.max
-import java.lang.Math.min
+import java.lang.Math.*
 import java.util.Locale
+import kotlin.math.pow
 
 /** Draw the detected pose in preview.  */
 class PoseDataGraphic internal constructor(
@@ -63,6 +64,7 @@ class PoseDataGraphic internal constructor(
   }
 
   override fun draw(canvas: Canvas) {
+
     val landmarks = pose.allPoseLandmarks
     if (landmarks.isEmpty()) {
       return
@@ -127,6 +129,26 @@ class PoseDataGraphic internal constructor(
     val leftFootIndex = pose.getPoseLandmark(PoseLandmark.LEFT_FOOT_INDEX)
     val rightFootIndex = pose.getPoseLandmark(PoseLandmark.RIGHT_FOOT_INDEX)
 
+//    The ratio of the torso to the height
+    val torsoTop = midPoint(leftShoulder, rightShoulder);
+    val torsoBottom = midPoint(leftHip, rightHip);
+    val torsolLength = distance(torsoTop, torsoBottom);
+    // TODO: We don't have exact height. We can estimate it from selfie segmentation!
+    val faceWidth = distance(leftEar, rightEar);
+    val faceTop = add( nose!!.position3D, PointF3D.from(0f,faceWidth,0f))
+    val midFeet = midPoint(leftAnkle, rightAnkle)
+    val height = distance(faceTop, midFeet)
+//    The ratio of the head to the height
+
+//    The ratio of legs to the height
+//    The length of the arms
+//    The length of legs
+//    The size of the shoulders
+//    The length of the torso
+//    Waist length
+
+
+
     // Face
     drawLine(canvas, nose, lefyEyeInner, whitePaint)
     drawLine(canvas, lefyEyeInner, lefyEye, whitePaint)
@@ -180,10 +202,35 @@ class PoseDataGraphic internal constructor(
     }
   }
 
+  private fun add(a: PointF3D, b: PointF3D): PointF3D {
+    return PointF3D.from(a.x + b.x, a.y + b.y, a.z + b.z );
+  }
+  private fun sub(a: PointF3D, b: PointF3D): PointF3D {
+    return PointF3D.from(a.x - b.x, a.y - b.y, a.z - b.z );
+  }
+
   internal fun drawPoint(canvas: Canvas, landmark: PoseLandmark, paint: Paint) {
     val point = landmark.position3D
     maybeUpdatePaintColor(paint, canvas, point.z)
     canvas.drawCircle(translateX(point.x), translateY(point.y), DOT_RADIUS, paint)
+  }
+
+  fun distance(startLandmark: PoseLandmark?, endLandmark: PoseLandmark?): Float {
+    val a = startLandmark!!.position3D
+    val b = endLandmark!!.position3D
+    return ( (a.x - b.x).pow(2) + (a.y - b.y).pow(2)  ).pow(.5f)
+  }
+
+  fun distance(startLandmark: PointF3D, endLandmark: PointF3D): Float {
+    val a = startLandmark
+    val b = endLandmark
+    return ( (a.x - b.x).pow(2) + (a.y - b.y).pow(2)  ).pow(.5f)
+  }
+
+  fun midPoint(startLandmark: PoseLandmark?, endLandmark: PoseLandmark?): PointF3D {
+    val a = startLandmark!!.position3D
+    val b = endLandmark!!.position3D
+    return PointF3D.from( (a.x + b.x) / 2, (a.y - b.y)/2, (a.z - b.z)/2 )
   }
 
   internal fun drawLine(

@@ -63,6 +63,7 @@ class PoseGraphic internal constructor(
   }
 
   override fun draw(canvas: Canvas) {
+
     val landmarks = pose.allPoseLandmarks
     if (landmarks.isEmpty()) {
       return
