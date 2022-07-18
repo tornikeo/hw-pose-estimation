@@ -139,12 +139,17 @@ class PoseDataGraphic internal constructor(
     val midFeet = midPoint(leftAnkle, rightAnkle)
     val height = distance(faceTop, midFeet)
 //    The ratio of the head to the height
-
-//    The ratio of legs to the height
+//    TODO: Vertical length of face or horizontal?
 //    The length of the arms
+    val armLength = distance(leftIndex, leftWrist) * 1.5 + distance(leftWrist, leftElbow) + distance(leftElbow, leftShoulder) + distance(leftElbow, leftShoulder)+ distance(leftShoulder, rightShoulder) + distance(rightShoulder, rightElbow) + distance(rightElbow, rightWrist) + distance(rightWrist, rightIndex) * 1.5
 //    The length of legs
+    val legLength = distance(midFeet, torsoBottom)
+//    The ratio of legs to the height
+
 //    The size of the shoulders
+    val shoulderLength = distance(leftShoulder, rightShoulder)
 //    The length of the torso
+
 //    Waist length
 
 
