@@ -17,19 +17,12 @@
 package com.google.mlkit.vision.demo.kotlin
 
 import android.content.Intent
-import android.opengl.Visibility
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
+import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.ArrayAdapter
-import android.widget.CompoundButton
-import android.widget.ImageView
-import android.widget.Spinner
-import android.widget.Toast
-import android.widget.ToggleButton
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.common.annotation.KeepName
 import com.google.mlkit.common.model.LocalModel
 import com.google.mlkit.vision.demo.CameraSource
@@ -54,7 +47,6 @@ import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.io.IOException
-import java.util.ArrayList
 
 /** Live preview demo for ML Kit APIs. */
 @KeepName
@@ -65,7 +57,8 @@ class LivePreviewActivity :
   private var preview: CameraSourcePreview? = null
   private var graphicOverlay: GraphicOverlay? = null
 //  private var selectedModel = OBJECT_DETECTION
-  private var selectedModel = POSE_DETECTION
+//  private var selectedModel = POSE_DETECTION
+  private var selectedModel = POSE_DATA_EXTRACTION
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -93,6 +86,7 @@ class LivePreviewActivity :
     options.add(IMAGE_LABELING_CUSTOM)
     options.add(CUSTOM_AUTOML_LABELING)
     options.add(POSE_DETECTION)
+    options.add(POSE_DATA_EXTRACTION)
     options.add(SELFIE_SEGMENTATION)
     options.add(TEXT_RECOGNITION_LATIN)
     options.add(TEXT_RECOGNITION_CHINESE)
@@ -157,6 +151,8 @@ class LivePreviewActivity :
     // If there's no existing cameraSource, create one.
     if (cameraSource == null) {
       cameraSource = CameraSource(this, graphicOverlay)
+      // TODO: For testing purposes, camera faces front. Comment out in production.
+      cameraSource?.setFacing(CameraSource.CAMERA_FACING_FRONT)
     }
     try {
       when (model) {
@@ -258,6 +254,26 @@ class LivePreviewActivity :
             LabelDetectorProcessor(this, customAutoMLLabelOptions)
           )
         }
+        POSE_DATA_EXTRACTION -> {
+          val poseDetectorOptions = PreferenceUtils.getPoseDetectorOptionsForLivePreview(this)
+          Log.i(TAG, "Using Pose Data Extractor with options $poseDetectorOptions")
+          val shouldShowInFrameLikelihood =
+            PreferenceUtils.shouldShowPoseDetectionInFrameLikelihoodLivePreview(this)
+          val visualizeZ = PreferenceUtils.shouldPoseDetectionVisualizeZ(this)
+          val rescaleZ = PreferenceUtils.shouldPoseDetectionRescaleZForVisualization(this)
+          val runClassification = PreferenceUtils.shouldPoseDetectionRunClassification(this)
+          cameraSource!!.setMachineLearningFrameProcessor(
+            PoseDetectorProcessor(
+              this,
+              poseDetectorOptions,
+              shouldShowInFrameLikelihood,
+              visualizeZ,
+              rescaleZ,
+              runClassification,
+              /* isStreamMode = */ true
+            )
+          )
+        }
         POSE_DETECTION -> {
           val poseDetectorOptions = PreferenceUtils.getPoseDetectorOptionsForLivePreview(this)
           Log.i(TAG, "Using Pose Detector with options $poseDetectorOptions")
@@ -352,6 +368,7 @@ class LivePreviewActivity :
     private const val IMAGE_LABELING_CUSTOM = "Custom Image Labeling (Birds)"
     private const val CUSTOM_AUTOML_LABELING = "Custom AutoML Image Labeling (Flower)"
     private const val POSE_DETECTION = "Pose Detection"
+    private const val POSE_DATA_EXTRACTION = "Pose Data Extraction"
     private const val SELFIE_SEGMENTATION = "Selfie Segmentation"
 
     private const val TAG = "LivePreviewActivity"
