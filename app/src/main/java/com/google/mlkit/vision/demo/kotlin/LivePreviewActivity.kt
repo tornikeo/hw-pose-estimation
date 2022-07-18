@@ -33,6 +33,7 @@ import com.google.mlkit.vision.demo.kotlin.barcodescanner.BarcodeScannerProcesso
 import com.google.mlkit.vision.demo.kotlin.facedetector.FaceDetectorProcessor
 import com.google.mlkit.vision.demo.kotlin.labeldetector.LabelDetectorProcessor
 import com.google.mlkit.vision.demo.kotlin.objectdetector.ObjectDetectorProcessor
+import com.google.mlkit.vision.demo.kotlin.posedetector.PoseDataExtractorProcessor
 import com.google.mlkit.vision.demo.kotlin.posedetector.PoseDetectorProcessor
 import com.google.mlkit.vision.demo.kotlin.segmenter.SegmenterProcessor
 import com.google.mlkit.vision.demo.kotlin.textdetector.TextRecognitionProcessor
@@ -77,6 +78,7 @@ class LivePreviewActivity :
 
     val spinner = findViewById<Spinner>(R.id.spinner)
     val options: MutableList<String> = ArrayList()
+    options.add(POSE_DATA_EXTRACTION)
     options.add(OBJECT_DETECTION)
     options.add(OBJECT_DETECTION_CUSTOM)
     options.add(CUSTOM_AUTOML_OBJECT_DETECTION)
@@ -86,7 +88,6 @@ class LivePreviewActivity :
     options.add(IMAGE_LABELING_CUSTOM)
     options.add(CUSTOM_AUTOML_LABELING)
     options.add(POSE_DETECTION)
-    options.add(POSE_DATA_EXTRACTION)
     options.add(SELFIE_SEGMENTATION)
     options.add(TEXT_RECOGNITION_LATIN)
     options.add(TEXT_RECOGNITION_CHINESE)
@@ -100,9 +101,9 @@ class LivePreviewActivity :
     // Drop down layout style - list view with radio button
     dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     // attaching data adapter to spinner
-//    spinner.adapter = dataAdapter
-//    spinner.onItemSelectedListener = this
-    spinner.visibility = View.GONE;
+    spinner.adapter = dataAdapter
+    spinner.onItemSelectedListener = this
+//    spinner.visibility = View.GONE;
 
     val facingSwitch = findViewById<ToggleButton>(R.id.facing_switch)
     facingSwitch.setOnCheckedChangeListener(this)
@@ -263,7 +264,7 @@ class LivePreviewActivity :
           val rescaleZ = PreferenceUtils.shouldPoseDetectionRescaleZForVisualization(this)
           val runClassification = PreferenceUtils.shouldPoseDetectionRunClassification(this)
           cameraSource!!.setMachineLearningFrameProcessor(
-            PoseDetectorProcessor(
+            PoseDataExtractorProcessor(
               this,
               poseDetectorOptions,
               shouldShowInFrameLikelihood,

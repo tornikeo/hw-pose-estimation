@@ -125,6 +125,6 @@ class PoseDataExtractorProcessor(
   }
 
   companion object {
-    private val TAG = "PoseDetectorProcessor"
+    private val TAG = "PoseDataExtractor"
   }
 }
