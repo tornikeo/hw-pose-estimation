@@ -19,6 +19,7 @@ package com.google.mlkit.vision.demo.kotlin.posedetector
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.PointF
 import com.google.common.primitives.Ints
 import com.google.mlkit.vision.common.PointF3D
 import com.google.mlkit.vision.demo.GraphicOverlay
@@ -47,13 +48,13 @@ class PoseDataGraphic internal constructor(
 
   init {
     classificationTextPaint = Paint()
-    classificationTextPaint.color = Color.WHITE
-    classificationTextPaint.textSize = POSE_CLASSIFICATION_TEXT_SIZE
+    classificationTextPaint.color = Color.GREEN
+    classificationTextPaint.textSize =  POSE_CLASSIFICATION_TEXT_SIZE
     classificationTextPaint.setShadowLayer(5.0f, 0f, 0f, Color.BLACK)
 
     whitePaint = Paint()
     whitePaint.strokeWidth = STROKE_WIDTH
-    whitePaint.color = Color.WHITE
+    whitePaint.color = Color.GREEN
     whitePaint.textSize = IN_FRAME_LIKELIHOOD_TEXT_SIZE
     leftPaint = Paint()
     leftPaint.strokeWidth = STROKE_WIDTH
@@ -85,13 +86,13 @@ class PoseDataGraphic internal constructor(
     }
 
     // Draw all the points
-    for (landmark in landmarks) {
-      drawPoint(canvas, landmark, whitePaint)
-      if (visualizeZ && rescaleZForVisualization) {
-        zMin = min(zMin, landmark.position3D.z)
-        zMax = max(zMax, landmark.position3D.z)
-      }
-    }
+//    for (landmark in landmarks) {
+//      drawPoint(canvas, landmark, whitePaint)
+//      if (visualizeZ && rescaleZForVisualization) {
+//        zMin = min(zMin, landmark.position3D.z)
+//        zMax = max(zMax, landmark.position3D.z)
+//      }
+//    }
 
     val nose = pose.getPoseLandmark(PoseLandmark.NOSE)
     val lefyEyeInner = pose.getPoseLandmark(PoseLandmark.LEFT_EYE_INNER)
@@ -129,15 +130,15 @@ class PoseDataGraphic internal constructor(
     val leftFootIndex = pose.getPoseLandmark(PoseLandmark.LEFT_FOOT_INDEX)
     val rightFootIndex = pose.getPoseLandmark(PoseLandmark.RIGHT_FOOT_INDEX)
 
-    // Data extraction for bodyratio
+    // Data extraction for body ratio
     val torsoTop = midPoint(leftShoulder, rightShoulder)
     val torsoBottom = midPoint(leftHip, rightHip)
     val torsoLength = distance(torsoTop, torsoBottom)
 
     // TODO: We don't have exact height. But we could estimate it from selfie segmentation!
     val faceWidth = distance(leftEar, rightEar)
-    val headTop = add( nose!!.position3D, PointF3D.from(0f,faceWidth,0f))
-    val headBottom = add( nose!!.position3D, PointF3D.from(0f, - faceWidth,0f))
+    val headTop = add( nose!!.position, PointF(0f, - faceWidth * 1.05f))
+    val headBottom = add( nose!!.position, PointF(0f, + faceWidth * .8f))
     val headLength = distance(headTop, headBottom)
     val midFeet = midPoint(leftAnkle, rightAnkle)
     val height = distance(headTop, midFeet)
@@ -151,31 +152,85 @@ class PoseDataGraphic internal constructor(
 
 //    The ratio of the torso to the height
     torsoLength / height
+    val midRightTorso = midPoint(rightShoulder, rightHip)
+    canvas.drawText(
+      "Torso/Height " + String.format(Locale.US, "%.2f", torsoLength / height),
+      translateX(midRightTorso.x),
+      translateY(midRightTorso.y),
+      whitePaint,
+    )
 //    The ratio of the head to the height
     headLength / height
+    canvas.drawText(
+      "Head/Height " + String.format(Locale.US, "%.2f", headLength / height),
+      translateX(rightEar!!.position.x),
+      translateY(rightEar.position.y),
+      whitePaint
+    )
+
 //    The length of the arms
     armLength
+    val midRightArm = midPoint(rightShoulder, rightElbow)
+    canvas.drawText(
+      "Arms " + String.format(Locale.US, "%.2f", armLength) + " px",
+      translateX(midRightArm.x),
+      translateY(midRightArm.y),
+      whitePaint
+    )
 //    The length of legs
     legLength
+//    val midRightArm = midPoint(rightShoulder, rightElbow)
+    canvas.drawText(
+      "Legs " + String.format(Locale.US, "%.2f", legLength) + " px",
+      translateX(rightKnee!!.position.x),
+      translateY(rightKnee.position.y),
+      whitePaint
+    )
 //    The ratio of legs to the height
     legLength / height
+    canvas.drawText(
+      "Leg/Height " + String.format(Locale.US, "%.2f", legLength / height),
+      translateX(leftKnee!!.position.x),
+      translateY(leftKnee.position.y),
+      whitePaint
+    )
 //    The size of the shoulders
     shoulderLength
+    canvas.drawText(
+      "Shoulders " + String.format(Locale.US, "%.2f", shoulderLength) + " px",
+      translateX(rightShoulder!!.position.x),
+      translateY(rightShoulder.position.y),
+      whitePaint
+    )
 //    The length of the torso
     torsoLength
+    val centerTorso = midPoint(torsoTop, torsoBottom)
+    canvas.drawText(
+      "Torso " + String.format(Locale.US, "%.2f", torsoLength) + " px",
+      translateX(centerTorso.x),
+      translateY(centerTorso.y),
+      whitePaint,
+    )
+
 //    Waist length
     waistLength
+    canvas.drawText(
+      "Waist " + String.format(Locale.US, "%.2f", waistLength) + " px",
+      translateX(rightHip!!.position.x),
+      translateY(rightHip.position.y),
+      whitePaint,
+    )
 
     // Face
-    drawLine(canvas, nose, lefyEyeInner, whitePaint)
-    drawLine(canvas, lefyEyeInner, lefyEye, whitePaint)
-    drawLine(canvas, lefyEye, leftEyeOuter, whitePaint)
-    drawLine(canvas, leftEyeOuter, leftEar, whitePaint)
-    drawLine(canvas, nose, rightEyeInner, whitePaint)
-    drawLine(canvas, rightEyeInner, rightEye, whitePaint)
-    drawLine(canvas, rightEye, rightEyeOuter, whitePaint)
-    drawLine(canvas, rightEyeOuter, rightEar, whitePaint)
-    drawLine(canvas, leftMouth, rightMouth, whitePaint)
+//    drawLine(canvas, nose, lefyEyeInner, whitePaint)
+//    drawLine(canvas, lefyEyeInner, lefyEye, whitePaint)
+//    drawLine(canvas, lefyEye, leftEyeOuter, whitePaint)
+//    drawLine(canvas, leftEyeOuter, leftEar, whitePaint)
+//    drawLine(canvas, nose, rightEyeInner, whitePaint)
+//    drawLine(canvas, rightEyeInner, rightEye, whitePaint)
+//    drawLine(canvas, rightEye, rightEyeOuter, whitePaint)
+//    drawLine(canvas, rightEyeOuter, rightEar, whitePaint)
+//    drawLine(canvas, leftMouth, rightMouth, whitePaint)
 
     drawLine(canvas, leftShoulder, rightShoulder, whitePaint)
     drawLine(canvas, leftHip, rightHip, whitePaint)
@@ -183,26 +238,34 @@ class PoseDataGraphic internal constructor(
     // Left body
     drawLine(canvas, leftShoulder, leftElbow, leftPaint)
     drawLine(canvas, leftElbow, leftWrist, leftPaint)
-    drawLine(canvas, leftShoulder, leftHip, leftPaint)
+//    drawLine(canvas, leftShoulder, leftHip, leftPaint)
+
     drawLine(canvas, leftHip, leftKnee, leftPaint)
     drawLine(canvas, leftKnee, leftAnkle, leftPaint)
-    drawLine(canvas, leftWrist, leftThumb, leftPaint)
-    drawLine(canvas, leftWrist, leftPinky, leftPaint)
+//    drawLine(canvas, leftWrist, leftThumb, leftPaint)
+//    drawLine(canvas, leftWrist, leftPinky, leftPaint)
     drawLine(canvas, leftWrist, leftIndex, leftPaint)
-    drawLine(canvas, leftIndex, leftPinky, leftPaint)
+//    drawLine(canvas, leftIndex, leftPinky, leftPaint)
     drawLine(canvas, leftAnkle, leftHeel, leftPaint)
     drawLine(canvas, leftHeel, leftFootIndex, leftPaint)
+
+    // Center Torso line
+    drawLine(canvas, torsoTop, torsoBottom, leftPaint )
+    // Head top to bottom
+    drawLine(canvas, headTop, headBottom, leftPaint)
+    // head left to right
+    drawLine(canvas, rightEar, leftEar, leftPaint)
 
     // Right body
     drawLine(canvas, rightShoulder, rightElbow, rightPaint)
     drawLine(canvas, rightElbow, rightWrist, rightPaint)
-    drawLine(canvas, rightShoulder, rightHip, rightPaint)
+//    drawLine(canvas, rightShoulder, rightHip, rightPaint)
     drawLine(canvas, rightHip, rightKnee, rightPaint)
     drawLine(canvas, rightKnee, rightAnkle, rightPaint)
-    drawLine(canvas, rightWrist, rightThumb, rightPaint)
-    drawLine(canvas, rightWrist, rightPinky, rightPaint)
+//    drawLine(canvas, rightWrist, rightThumb, rightPaint)
+//    drawLine(canvas, rightWrist, rightPinky, rightPaint)
     drawLine(canvas, rightWrist, rightIndex, rightPaint)
-    drawLine(canvas, rightIndex, rightPinky, rightPaint)
+//    drawLine(canvas, rightIndex, rightPinky, rightPaint)
     drawLine(canvas, rightAnkle, rightHeel, rightPaint)
     drawLine(canvas, rightHeel, rightFootIndex, rightPaint)
 
@@ -222,11 +285,12 @@ class PoseDataGraphic internal constructor(
 
   }
 
-  private fun add(a: PointF3D, b: PointF3D): PointF3D {
-    return PointF3D.from(a.x + b.x, a.y + b.y, a.z + b.z );
+
+  private fun add(a: PointF, b: PointF): PointF {
+    return PointF(a.x + b.x, a.y + b.y );
   }
-  private fun sub(a: PointF3D, b: PointF3D): PointF3D {
-    return PointF3D.from(a.x - b.x, a.y - b.y, a.z - b.z );
+  private fun sub(a: PointF, b: PointF): PointF {
+    return PointF(a.x - b.x, a.y - b.y);
   }
 
   internal fun drawPoint(canvas: Canvas, landmark: PoseLandmark, paint: Paint) {
@@ -241,16 +305,29 @@ class PoseDataGraphic internal constructor(
     return ( (a.x - b.x).pow(2) + (a.y - b.y).pow(2)  ).pow(.5f)
   }
 
-  fun distance(startLandmark: PointF3D, endLandmark: PointF3D): Float {
+  fun distance(startLandmark: PointF, endLandmark: PointF): Float {
     val a = startLandmark
     val b = endLandmark
     return ( (a.x - b.x).pow(2) + (a.y - b.y).pow(2)  ).pow(.5f)
   }
+  private fun midPoint(a: PointF, b: PointF): PointF {
+    return PointF((a.x + b.x) / 2f, (a.y + b.y) / 2f)
+  }
 
-  fun midPoint(startLandmark: PoseLandmark?, endLandmark: PoseLandmark?): PointF3D {
-    val a = startLandmark!!.position3D
-    val b = endLandmark!!.position3D
-    return PointF3D.from( (a.x + b.x) / 2, (a.y - b.y)/2, (a.z - b.z)/2 )
+  fun midPoint(startLandmark: PoseLandmark?, endLandmark: PoseLandmark?): PointF {
+    val a = startLandmark!!.position
+    val b = endLandmark!!.position
+    return midPoint(a,b)
+  }
+
+  private fun drawLine(canvas: Canvas, startPoint: PointF, endPoint: PointF, paint: Paint) {
+    canvas.drawLine(
+      translateX(startPoint.x),
+      translateY(startPoint.y),
+      translateX(endPoint.x),
+      translateY(endPoint.y),
+      leftPaint
+    )
   }
 
   internal fun drawLine(
@@ -321,8 +398,8 @@ class PoseDataGraphic internal constructor(
   companion object {
 
     private val DOT_RADIUS = 8.0f
-    private val IN_FRAME_LIKELIHOOD_TEXT_SIZE = 30.0f
-    private val STROKE_WIDTH = 10.0f
+    private val IN_FRAME_LIKELIHOOD_TEXT_SIZE = 50.0f
+    private val STROKE_WIDTH = 30.0f
     private val POSE_CLASSIFICATION_TEXT_SIZE = 60.0f
   }
 }
