@@ -129,30 +129,42 @@ class PoseDataGraphic internal constructor(
     val leftFootIndex = pose.getPoseLandmark(PoseLandmark.LEFT_FOOT_INDEX)
     val rightFootIndex = pose.getPoseLandmark(PoseLandmark.RIGHT_FOOT_INDEX)
 
-//    The ratio of the torso to the height
-    val torsoTop = midPoint(leftShoulder, rightShoulder);
-    val torsoBottom = midPoint(leftHip, rightHip);
-    val torsolLength = distance(torsoTop, torsoBottom);
-    // TODO: We don't have exact height. We can estimate it from selfie segmentation!
-    val faceWidth = distance(leftEar, rightEar);
-    val faceTop = add( nose!!.position3D, PointF3D.from(0f,faceWidth,0f))
+    // Data extraction for bodyratio
+    val torsoTop = midPoint(leftShoulder, rightShoulder)
+    val torsoBottom = midPoint(leftHip, rightHip)
+    val torsoLength = distance(torsoTop, torsoBottom)
+
+    // TODO: We don't have exact height. But we could estimate it from selfie segmentation!
+    val faceWidth = distance(leftEar, rightEar)
+    val headTop = add( nose!!.position3D, PointF3D.from(0f,faceWidth,0f))
+    val headBottom = add( nose!!.position3D, PointF3D.from(0f, - faceWidth,0f))
+    val headLength = distance(headTop, headBottom)
     val midFeet = midPoint(leftAnkle, rightAnkle)
-    val height = distance(faceTop, midFeet)
-//    The ratio of the head to the height
-//    TODO: Vertical length of face or horizontal?
-//    The length of the arms
+    val height = distance(headTop, midFeet)
+
     val armLength = distance(leftIndex, leftWrist) * 1.5 + distance(leftWrist, leftElbow) + distance(leftElbow, leftShoulder) + distance(leftElbow, leftShoulder)+ distance(leftShoulder, rightShoulder) + distance(rightShoulder, rightElbow) + distance(rightElbow, rightWrist) + distance(rightWrist, rightIndex) * 1.5
-//    The length of legs
     val legLength = distance(midFeet, torsoBottom)
-//    The ratio of legs to the height
-
-//    The size of the shoulders
     val shoulderLength = distance(leftShoulder, rightShoulder)
+    // TODO: Adjust waist length using data + poly regression. This is likely very incorrect!
+    val hipLength = distance(leftHip, rightHip) * 1.2
+    val waistLength = Math.PI * hipLength * .85
+
+//    The ratio of the torso to the height
+    torsoLength / height
+//    The ratio of the head to the height
+    headLength / height
+//    The length of the arms
+    armLength
+//    The length of legs
+    legLength
+//    The ratio of legs to the height
+    legLength / height
+//    The size of the shoulders
+    shoulderLength
 //    The length of the torso
-
+    torsoLength
 //    Waist length
-
-
+    waistLength
 
     // Face
     drawLine(canvas, nose, lefyEyeInner, whitePaint)
@@ -194,17 +206,20 @@ class PoseDataGraphic internal constructor(
     drawLine(canvas, rightAnkle, rightHeel, rightPaint)
     drawLine(canvas, rightHeel, rightFootIndex, rightPaint)
 
+
+
     // Draw inFrameLikelihood for all points
-    if (showInFrameLikelihood) {
-      for (landmark in landmarks) {
-        canvas.drawText(
-          String.format(Locale.US, "%.2f", landmark.inFrameLikelihood),
-          translateX(landmark.position.x),
-          translateY(landmark.position.y),
-          whitePaint
-        )
-      }
-    }
+//    if (showInFrameLikelihood) {
+//      for (landmark in landmarks) {
+//        canvas.drawText(
+//          String.format(Locale.US, "%.2f", landmark.inFrameLikelihood),
+//          translateX(landmark.position.x),
+//          translateY(landmark.position.y),
+//          whitePaint
+//        )
+//      }
+//    }
+
   }
 
   private fun add(a: PointF3D, b: PointF3D): PointF3D {
