@@ -35,13 +35,9 @@ import com.google.mlkit.vision.demo.CameraSource;
 import com.google.mlkit.vision.demo.CameraSourcePreview;
 import com.google.mlkit.vision.demo.GraphicOverlay;
 import com.google.mlkit.vision.demo.R;
-import com.google.mlkit.vision.demo.java.barcodescanner.BarcodeScannerProcessor;
 import com.google.mlkit.vision.demo.java.facedetector.FaceDetectorProcessor;
-import com.google.mlkit.vision.demo.java.labeldetector.LabelDetectorProcessor;
-import com.google.mlkit.vision.demo.java.objectdetector.ObjectDetectorProcessor;
 import com.google.mlkit.vision.demo.java.posedetector.PoseDetectorProcessor;
 import com.google.mlkit.vision.demo.java.segmenter.SegmenterProcessor;
-import com.google.mlkit.vision.demo.java.textdetector.TextRecognitionProcessor;
 import com.google.mlkit.vision.demo.preference.PreferenceUtils;
 import com.google.mlkit.vision.demo.preference.SettingsActivity;
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions;
@@ -181,97 +177,9 @@ public final class LivePreviewActivity extends AppCompatActivity
 
     try {
       switch (model) {
-        case OBJECT_DETECTION:
-          Log.i(TAG, "Using Object Detector Processor");
-          ObjectDetectorOptions objectDetectorOptions =
-              PreferenceUtils.getObjectDetectorOptionsForLivePreview(this);
-          cameraSource.setMachineLearningFrameProcessor(
-              new ObjectDetectorProcessor(this, objectDetectorOptions));
-          break;
-        case OBJECT_DETECTION_CUSTOM:
-          Log.i(TAG, "Using Custom Object Detector Processor");
-          LocalModel localModel =
-              new LocalModel.Builder()
-                  .setAssetFilePath("custom_models/object_labeler.tflite")
-                  .build();
-          CustomObjectDetectorOptions customObjectDetectorOptions =
-              PreferenceUtils.getCustomObjectDetectorOptionsForLivePreview(this, localModel);
-          cameraSource.setMachineLearningFrameProcessor(
-              new ObjectDetectorProcessor(this, customObjectDetectorOptions));
-          break;
-        case CUSTOM_AUTOML_OBJECT_DETECTION:
-          Log.i(TAG, "Using Custom AutoML Object Detector Processor");
-          LocalModel customAutoMLODTLocalModel =
-              new LocalModel.Builder().setAssetManifestFilePath("automl/manifest.json").build();
-          CustomObjectDetectorOptions customAutoMLODTOptions =
-              PreferenceUtils.getCustomObjectDetectorOptionsForLivePreview(
-                  this, customAutoMLODTLocalModel);
-          cameraSource.setMachineLearningFrameProcessor(
-              new ObjectDetectorProcessor(this, customAutoMLODTOptions));
-          break;
-        case TEXT_RECOGNITION_LATIN:
-          Log.i(TAG, "Using on-device Text recognition Processor for Latin.");
-          cameraSource.setMachineLearningFrameProcessor(
-              new TextRecognitionProcessor(this, new TextRecognizerOptions.Builder().build()));
-          break;
-        case TEXT_RECOGNITION_CHINESE:
-          Log.i(TAG, "Using on-device Text recognition Processor for Latin and Chinese.");
-          cameraSource.setMachineLearningFrameProcessor(
-              new TextRecognitionProcessor(
-                  this, new ChineseTextRecognizerOptions.Builder().build()));
-          break;
-        case TEXT_RECOGNITION_DEVANAGARI:
-          Log.i(TAG, "Using on-device Text recognition Processor for Latin and Devanagari.");
-          cameraSource.setMachineLearningFrameProcessor(
-              new TextRecognitionProcessor(
-                  this, new DevanagariTextRecognizerOptions.Builder().build()));
-          break;
-        case TEXT_RECOGNITION_JAPANESE:
-          Log.i(TAG, "Using on-device Text recognition Processor for Latin and Japanese.");
-          cameraSource.setMachineLearningFrameProcessor(
-              new TextRecognitionProcessor(
-                  this, new JapaneseTextRecognizerOptions.Builder().build()));
-          break;
-        case TEXT_RECOGNITION_KOREAN:
-          Log.i(TAG, "Using on-device Text recognition Processor for Latin and Korean.");
-          cameraSource.setMachineLearningFrameProcessor(
-              new TextRecognitionProcessor(
-                  this, new KoreanTextRecognizerOptions.Builder().build()));
-          break;
         case FACE_DETECTION:
           Log.i(TAG, "Using Face Detector Processor");
           cameraSource.setMachineLearningFrameProcessor(new FaceDetectorProcessor(this));
-          break;
-        case BARCODE_SCANNING:
-          Log.i(TAG, "Using Barcode Detector Processor");
-          cameraSource.setMachineLearningFrameProcessor(new BarcodeScannerProcessor(this));
-          break;
-        case IMAGE_LABELING:
-          Log.i(TAG, "Using Image Label Detector Processor");
-          cameraSource.setMachineLearningFrameProcessor(
-              new LabelDetectorProcessor(this, ImageLabelerOptions.DEFAULT_OPTIONS));
-          break;
-        case IMAGE_LABELING_CUSTOM:
-          Log.i(TAG, "Using Custom Image Label Detector Processor");
-          LocalModel localClassifier =
-              new LocalModel.Builder()
-                  .setAssetFilePath("custom_models/bird_classifier.tflite")
-                  .build();
-          CustomImageLabelerOptions customImageLabelerOptions =
-              new CustomImageLabelerOptions.Builder(localClassifier).build();
-          cameraSource.setMachineLearningFrameProcessor(
-              new LabelDetectorProcessor(this, customImageLabelerOptions));
-          break;
-        case CUSTOM_AUTOML_LABELING:
-          Log.i(TAG, "Using Custom AutoML Image Label Detector Processor");
-          LocalModel customAutoMLLabelLocalModel =
-              new LocalModel.Builder().setAssetManifestFilePath("automl/manifest.json").build();
-          CustomImageLabelerOptions customAutoMLLabelOptions =
-              new CustomImageLabelerOptions.Builder(customAutoMLLabelLocalModel)
-                  .setConfidenceThreshold(0)
-                  .build();
-          cameraSource.setMachineLearningFrameProcessor(
-              new LabelDetectorProcessor(this, customAutoMLLabelOptions));
           break;
         case POSE_DETECTION:
           PoseDetectorOptionsBase poseDetectorOptions =

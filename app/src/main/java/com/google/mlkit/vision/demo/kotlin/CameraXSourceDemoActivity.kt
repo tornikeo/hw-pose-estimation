@@ -37,7 +37,6 @@ import com.google.mlkit.vision.camera.DetectionTaskCallback
 import com.google.mlkit.vision.demo.GraphicOverlay
 import com.google.mlkit.vision.demo.InferenceInfoGraphic
 import com.google.mlkit.vision.demo.R
-import com.google.mlkit.vision.demo.kotlin.objectdetector.ObjectGraphic
 import com.google.mlkit.vision.demo.preference.PreferenceUtils
 import com.google.mlkit.vision.demo.preference.SettingsActivity
 import com.google.mlkit.vision.demo.preference.SettingsActivity.LaunchSource
@@ -172,9 +171,7 @@ class CameraXSourceDemoActivity : AppCompatActivity(), CompoundButton.OnCheckedC
       }
     }
     Log.v(TAG, "Number of object been detected: " + results.size)
-    for (`object` in results) {
-      graphicOverlay!!.add(ObjectGraphic(graphicOverlay!!, `object`))
-    }
+
     graphicOverlay!!.add(InferenceInfoGraphic(graphicOverlay!!))
     graphicOverlay!!.postInvalidate()
   }
